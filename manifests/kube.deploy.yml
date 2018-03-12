@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: "demo-eureka-service"
+spec:
+  # if your cluster supports it, uncomment the following to automatically create
+  # an external load-balanced IP for the frontend service.
+  #type: LoadBalancer
+  type: NodePort
+  ports:
+  # the port that this service should serve on
+  - name: http
+    port: 1000
+
+  selector:
+    app: "demo-eureka-selector"
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: "demo-eureka-deployment"
+spec:
+  # this replicas value is default
+  # modify it according to your case
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: "demo-eureka-selector"
+    spec:
+      containers:
+      - name: demo-eureka
+        image: demo-eureka:latest
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 1000
+          initialDelaySeconds: 20
+        # resources:
+        #   requests:
+        #     cpu: 100m
+        #     memory: 100Mi
